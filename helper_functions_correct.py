@@ -8,7 +8,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 import subprocess
-
+import json
 import datetime as dt
 import yaml
 import os
@@ -32,7 +32,9 @@ def write_to_csv(query_df, output_file_name):
 
     # OUTPUT_LOCAL_FILENAME = '/ldap_home/shopeebi/workspace/business_analytics/Salesforce_validation/validation_%s_%s.csv' % (
     #     country, Today)
-    OUTPUT_FILENAME = '/user/yutong.zou/tmp/atp_temp.csv'
+    username = os.getcwd().split('/')[-1]
+    OUTPUT_FILENAME = 'user/{u}/tmp/atp_temp.csv'.format(u=username)
+    print(OUTPUT_FILENAME)
     reqHeaders = query_df.columns
     local_filename = output_file_name
     print(local_filename)
@@ -55,7 +57,8 @@ def write_to_csv(query_df, output_file_name):
     os.remove(local_filename + "_tmp")
 
 
-def append_df_to_excel(template_file_name, write_dict, output_file_name, start_row=0, start_col=0, header_bool=True, **to_excel_kwargs):
+def append_df_to_excel(template_file_name, write_dict, output_file_name, start_row=0, start_col=0, header_bool=True,
+                       **to_excel_kwargs):
     '''
     This function takes in the template file name to refer to and a dictionary of dataframes. It then writes and saves to an specified output file.
     :param template_file_name: File name of the template to write to
@@ -143,41 +146,81 @@ def append_df_to_excel(template_file_name, write_dict, output_file_name, start_r
     writer.book.save(output_file_name)
     print("Completed!")
 
-def Regional_ATP_rewrite(ATP_path,template_path,c):
-    wb=load_workbook(ATP_path, data_only=True, read_only=True)
-    ATP_template=load_workbook(template_path)
-    ws=wb['Summary']
-    ws_temp=ATP_template['Sheet1']
-    n=['H','L','AB']
+
+def Regional_ATP_rewrite(ATP_path, template_path, c):
+    '''
+    This function takes in the template file to refer to and a dictionary of dataframes. It then writes and saves to an specified output file.
+    :param template_path: File path of the template for ATP summary report to write to
+    :type template_path: str
+    :param ATP_path: File path of the ATP report to get the summary data from
+    :type ATP_path: str
+    :param c: country sequese in the country list
+    :type c: int
+    :return:
+    '''
+    wb = load_workbook(ATP_path, data_only=True, read_only=True)
+    ATP_template = load_workbook(template_path)
+    ws = wb['Summary']
+    ws_temp = ATP_template['Sheet1']
+    n = ['H', 'L', 'AB']
     for j in range(3):
-        v=chr(ord('G')+8*j+c)
-        if ord(v)>90:  #chr(90)=Z
-            v='A'+chr((ord(v)-90)+64)
-        for i in range(8,21):
-            c1='%s%d'%(n[j],i)  #loc cell
-            c2='%s%d'%(v,i-1)
-            cell=ws[c1].value
-            ws_temp[c2].value=cell
-    cell=ws['H5'].value
-    ws_temp['C3'].value='Date: '+cell
+        v = chr(ord('G') + 8 * j + c)
+        if ord(v) > 90:  # chr(90)=Z
+            v = 'A' + chr((ord(v) - 90) + 64)
+        for i in range(8, 21):
+            c1 = '%s%d' % (n[j], i)  # loc cell
+            c2 = '%s%d' % (v, i - 1)
+            cell = ws[c1].value
+            ws_temp[c2].value = cell
+    try:
+        cell = ws['H5'].value
+        ws_temp['C3'].value = 'Date: ' + cell
+    except:
+        print('cannot concatenate str and NoneType objects')
     ATP_template.save(template_path)
     return
 
 
-def Regional_Replenishment_rewrite(Rep_path,template_path,c):
-    wb=load_workbook(Rep_path, data_only=True, read_only=True)
-    Rep_template=load_workbook(template_path)
-    ws=wb['Summary - SKUs hit ROP']
-    ws_temp=Rep_template['Sheet1']
-    n='J'
-    ls=[(11,9),(12,10),(13,11),(14,12),(15,13),(16,14),(17,15),(18,16),(19,17),(22,18),(23,19),(24,20)]
-    v=chr(ord('J')-1+c)
+def Regional_Replenishment_rewrite(Rep_path, template_path, c):
+    '''
+    This function takes in the template file to refer to and a dictionary of dataframes. It then writes and saves to an specified output file.
+    :param template_path: File path of the template for replenishment summary report to write to
+    :type template_path: str
+    :param Rep_path: File path of the Replenishment report to get the summary data from
+    :type Rep_path: str
+    :param c: country sequese in the country list
+    :type c: int
+    :return:
+    '''
+    wb = load_workbook(Rep_path, data_only=True, read_only=True)
+    Rep_template = load_workbook(template_path)
+    ws = wb['Summary - SKUs hit ROP']
+    ws_temp = Rep_template['Sheet1']
+    n = 'J'
+    ls = [(11, 9), (12, 10), (13, 11), (14, 12), (15, 13), (16, 14), (17, 15), (18, 16), (19, 17), (22, 18), (23, 19),
+          (24, 20)]
+    v = chr(ord('J') - 1 + c)
     for i in ls:
-        c1='%s%d'%(n,i[0])  #loc cell
-        c2='%s%d'%(v,i[1])
-        cell=ws[c1].value
-        ws_temp[c2].value=cell
-    cell=ws['D7'].value
-    ws_temp['C6'].value=cell
+        c1 = '%s%d' % (n, i[0])  # loc cell
+        c2 = '%s%d' % (v, i[1])
+        cell = ws[c1].value
+        ws_temp[c2].value = cell
+    try:
+        cell = ws['D7'].value
+        ws_temp['C6'].value = cell
+    except:
+        print('cannot concatenate str and NoneType objects')
     Rep_template.save(template_path)
     return
+
+
+def load_report_path(filepath):
+    fh = open(filepath)
+    data = json.load(fh)
+    fh.close()
+    return (data)
+
+
+def save_report_path(filename, data):
+    with open(filename, 'w')as f:
+        json.dump(data, f)
