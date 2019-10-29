@@ -333,7 +333,7 @@ def main(today_date, country_list, data_queried, files_processed, replenishment_
                 continue
             else:
                 print('Reading ' + ATP_reports_path[country_l[c]])
-                Regional_ATP_rewrite(ATP_reports_path[country_l[c]], ATP_summary_template, c)
+                regional_atp_rewrite(ATP_reports_path[country_l[c]], ATP_summary_template, c)
                 print(ATP_reports_path[country_l[c]] + ' is done')
         print('Written for ATP Summary!')
 
@@ -343,7 +343,7 @@ def main(today_date, country_list, data_queried, files_processed, replenishment_
                 continue
             else:
                 print('Reading ' + Replenishment_reports_path[country_l[c]])
-                Regional_Replenishment_rewrite(Replenishment_reports_path[country_l[c]], Rep_summary_template, c)
+                regional_replenishment_rewrite(Replenishment_reports_path[country_l[c]], Rep_summary_template, c)
                 print(Replenishment_reports_path[country_l[c]] + ' is done')
         print('Written for Replenishment Summary!')
 

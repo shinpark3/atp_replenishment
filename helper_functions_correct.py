@@ -147,7 +147,7 @@ def append_df_to_excel(template_file_name, write_dict, output_file_name, start_r
     print("Completed!")
 
 
-def Regional_ATP_rewrite(ATP_path, template_path, c):
+def regional_atp_rewrite(ATP_path, template_path, c):
     '''
     This function takes in the template file to refer to and a dictionary of dataframes. It then writes and saves to an specified output file.
     :param template_path: File path of the template for ATP summary report to write to
@@ -181,7 +181,7 @@ def Regional_ATP_rewrite(ATP_path, template_path, c):
     return
 
 
-def Regional_Replenishment_rewrite(Rep_path, template_path, c):
+def regional_replenishment_rewrite(Rep_path, template_path, c):
     '''
     This function takes in the template file to refer to and a dictionary of dataframes. It then writes and saves to an specified output file.
     :param template_path: File path of the template for replenishment summary report to write to
