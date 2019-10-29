@@ -17,7 +17,7 @@ import pandas as pd
 # from unidecode import unidecode
 import sql_queries
 from helper_functions_correct import append_df_to_excel, write_to_csv
-from helper_functions_correct import Regional_ATP_rewrite, Regional_Replenishment_rewrite, save_report_path, \
+from helper_functions_correct import regional_atp_rewrite, regional_replenishment_rewrite, save_report_path, \
     load_report_path
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from process_ATP_correct_v3 import process_atp_df, process_replenishment_df, process_raw_data_frames
