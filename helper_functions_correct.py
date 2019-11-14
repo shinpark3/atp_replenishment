@@ -16,7 +16,7 @@ import os
 # from pydrive.auth import GoogleAuth
 # from pydrive.drive import GoogleDrive
 import openpyxl
-from openpyxl.utils.cell import get_column_letter, column_index_from_string
+from openpyxl.cell import get_column_letter, column_index_from_string
 from sql_queries import is_replenishment_empty
 
 
@@ -158,26 +158,38 @@ def regional_atp_rewrite(ATP_path, template_path, c):
     :type c: int
     :return:
     '''
-    wb = load_workbook(ATP_path, data_only=True, read_only=True)
-    ATP_template = load_workbook(template_path)
-    ws = wb['Summary']
-    ws_temp = ATP_template['Sheet1']
+    writer = pd.ExcelWriter(ATP_path, engine='openpyxl')
+    writer.book = load_workbook(ATP_path, data_only=True, read_only=True)
+    writer.sheets = {ws.title: ws for ws in writer.book.worksheets}
+    writer2 = pd.ExcelWriter(template_path, engine='openpyxl')
+    writer2.book = load_workbook(template_path)
+    writer2.sheets = {ws.title: ws for ws in writer.book.worksheets}
+    ws = writer.book['Summary']
+    ws_temp = writer2.book['Summary']
     n = ['H', 'L', 'AB']
+    ls1 = [8, 9, 16, 17, 18, 19, 20]
+    ls2 = [7, 8, 10, 11, 12, 13, 14]
     for j in range(3):
         v = chr(ord('G') + 8 * j + c)
         if ord(v) > 90:  # chr(90)=Z
             v = 'A' + chr((ord(v) - 90) + 64)
-        for i in range(8, 21):
-            c1 = '%s%d' % (n[j], i)  # loc cell
-            c2 = '%s%d' % (v, i - 1)
+        for i in range(len(ls1)):
+            c1 = '%s%d' % (n[j], ls1[i])  # loc cell
+            c2 = '%s%d' % (v, ls2[i])
             cell = ws[c1].value
             ws_temp[c2].value = cell
+        others = 0
+        for i in range(10, 16):
+            o1 = '%s%d' % (n[j], i)  # loc cell
+            others += ws[o1].value
+        o2 = '%s%d' % (v, 9)
+        ws_temp[o2].value = others
     try:
         cell = ws['H5'].value
         ws_temp['C3'].value = 'Date: ' + cell
     except:
         print('cannot concatenate str and NoneType objects')
-    ATP_template.save(template_path)
+    writer2.book.save(template_path)
     return
 
 
@@ -195,7 +207,7 @@ def regional_replenishment_rewrite(Rep_path, template_path, c):
     wb = load_workbook(Rep_path, data_only=True, read_only=True)
     Rep_template = load_workbook(template_path)
     ws = wb['Summary - SKUs hit ROP']
-    ws_temp = Rep_template['Sheet1']
+    ws_temp = Rep_template['Summary']
     n = 'J'
     ls = [(11, 9), (12, 10), (13, 11), (14, 12), (15, 13), (16, 14), (17, 15), (18, 16), (19, 17), (22, 18), (23, 19),
           (24, 20)]
