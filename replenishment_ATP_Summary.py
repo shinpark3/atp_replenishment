@@ -4,6 +4,7 @@ import argparse
 import datetime as dt
 import os
 import json
+from openpyxl import load_workbook
 # from noattach import NoAttach
 # import sendmail
 # from pyspark.sql.types import *
@@ -327,6 +328,8 @@ def main(today_date, country_list, data_queried, files_processed, replenishment_
         print('Reading for templates!')
         Rep_summary_template = "./Summary templates/Regional_Replenishment_template_small.xlsx"
         ATP_summary_template = "./Summary templates/Regional_ATP_template_small.xlsx"
+        rep_output_path = "{}_{}.xlsx".format('./Summary templates/Regional_Replenishment_Summary', file_date)
+        atp_output_path = "{}_{}.xlsx".format('./Summary templates/Regional_ATP_Summary', file_date)
         for c in range(len(country_l)):
             if not os.path.exists(ATP_reports_path[country_l[c]]):
                 print(ATP_reports_path[country_l[c]] + ' not found')
@@ -335,6 +338,11 @@ def main(today_date, country_list, data_queried, files_processed, replenishment_
                 print('Reading ' + ATP_reports_path[country_l[c]])
                 regional_atp_rewrite(ATP_reports_path[country_l[c]], ATP_summary_template, c)
                 print(ATP_reports_path[country_l[c]] + ' is done')
+        writer = pd.ExcelWriter(ATP_summary_template, engine='openpyxl')
+        writer.book = load_workbook(ATP_summary_template)
+        writer.sheets = {ws.title: ws for ws in writer.book.worksheets}
+        writer.book.save(atp_output_path)
+
         print('Written for ATP Summary!')
 
         for c in range(len(country_l)):
@@ -345,6 +353,11 @@ def main(today_date, country_list, data_queried, files_processed, replenishment_
                 print('Reading ' + Replenishment_reports_path[country_l[c]])
                 regional_replenishment_rewrite(Replenishment_reports_path[country_l[c]], Rep_summary_template, c)
                 print(Replenishment_reports_path[country_l[c]] + ' is done')
+        writer2 = pd.ExcelWriter(Rep_summary_template, engine='openpyxl')
+        writer2.book = load_workbook(Rep_summary_template)
+        writer2.sheets = {ws.title: ws for ws in writer.book.worksheets}
+        writer2.book.save(rep_output_path)
+
         print('Written for Replenishment Summary!')
 
 
