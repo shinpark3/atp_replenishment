@@ -149,11 +149,11 @@ def get_brands(country, four_weeks_ago, two_weeks_ago, yesterday):
     return spark.sql(query)
 
 
-def get_cogs(country, r_date):
+def get_cogs_color(country, r_date):
     print("Getting Cogs")
     start_date = (r_date - datetime.timedelta(days=7*13)).strftime('%Y-%m-%d')
     query = ''' 
-    select sku_id, grass_date, cogs from shopee_bi_sbs_mart where grass_region = '{}' and grass_date >= date('{}')
+    select sku_id, grass_date, cogs, color, stock_on_hand from shopee_bi_sbs_mart where grass_region = '{}' and grass_date >= date('{}')
     '''.format(country, start_date)
 
     return spark.sql(query)

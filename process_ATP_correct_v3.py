@@ -396,8 +396,7 @@ def process_atp_df(country, wk_count, df_date, pr_po_inbound, replenishment, cat
                                 how='left').reset_index()
 
     ytd_product_info = ytd_product_info[
-        ['category', 'shopid', 'supplier_id', 'supplier_name', 'sku_id', 'ItemName', 'ModelName',
-         'sourcing_status',
+        ['category', 'shopid', 'supplier_id', 'supplier_name', 'sku_id', 'ItemName', 'ModelName', 'sourcing_status',
          'be_stock', 'grass_date', 'stddev_lead_time', 'avg_lead_time', 'shopee_merchANDiser']]
     ytd_product_info = pd.merge(ytd_product_info, latest_color, on='sku_id', how='left')
     ytd_product_info = pd.merge(ytd_product_info, item_profile[['sku_id', 'shop_name', 'item_price', 'cluster']],
@@ -838,9 +837,7 @@ def process_replenishment_df(country, yesterday_date, four_weeks_ago_date, purch
         ((wk_4_df3['purchasable'] == 'n') & (wk_4_df3['reorder_recommendation'] == 'yes')),
         pd.to_timedelta(
             wk_4_df3['oos_date'] - four_weeks_ago_datetime).dt.days, pd.NaT)
-
-    wk_4_df3['rop_to_oos'] = np.where(wk_4_df3['rop_to_oos'] < 0,
-                                      0, wk_4_df3['rop_to_oos'])
+    wk_4_df3['rop_to_oos'] = np.where(wk_4_df3['rop_to_oos'] < 0, 0, wk_4_df3['rop_to_oos'])
 
     yst_df = replenishment[replenishment['grass_date'] == yesterday_date]
     yst_df = yst_df[['sku_id', 'l30d_forecast']]
@@ -996,13 +993,9 @@ def process_replenishment_df(country, yesterday_date, four_weeks_ago_date, purch
     last_ext = ext[['supplier_id', 'avg_lead_time', 'grass_date']]
     last_ext0 = last_ext.sort_values('grass_date', ascending=False)
     last_ext1 = last_ext0.groupby('supplier_id')['supplier_id', 'avg_lead_time'].head(1)
-    last_inbound = inbound_df.sort_values('inbound_time').groupby('inbound_id')['inbound_id', 'inbound_time'].tail(1)
-
     inbound_df4['supplier_id'] = inbound_df4['supplier_id'].astype(str)
     last_ext1['supplier_id'] = last_ext1['supplier_id'].astype(str)
-
     inbound_df4 = inbound_df4.merge(last_ext1, on='supplier_id', how='left')
-    inbound_df4 = inbound_df4.merge(last_inbound, on='inbound_id', how='left')
     print('Finished Inbound tab')
 
     new_folder = './' + country + '/input_files/'
